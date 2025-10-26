@@ -4,6 +4,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.db.base import Base, engine
+
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
+    """Create database tables for testing"""
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Drop all tables after tests
+    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture
