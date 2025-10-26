@@ -1,0 +1,69 @@
+swagger: "2.0"
+info:
+  title: AreaYield OS API
+  description: 短期賃貸（民泊）投資の可否判定API
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      x-google-backend:
+        address: ${backend_url}/health
+        protocol: h2
+      responses:
+        200:
+          description: Service is healthy
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              version:
+                type: string
+  /api/v1/analyze:
+    post:
+      summary: Analyze property location
+      operationId: analyzeProperty
+      x-google-backend:
+        address: ${backend_url}/api/v1/analyze
+        protocol: h2
+      security:
+        - firebase: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - address
+            properties:
+              address:
+                type: string
+              property_type:
+                type: string
+              rooms:
+                type: integer
+              capacity:
+                type: integer
+      responses:
+        200:
+          description: Analysis result
+        400:
+          description: Invalid input
+        401:
+          description: Unauthorized
+securityDefinitions:
+  firebase:
+    authorizationUrl: ""
+    flow: implicit
+    type: oauth2
+    x-google-issuer: "https://securetoken.google.com/YOUR_PROJECT_ID"
+    x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    x-google-audiences: "YOUR_PROJECT_ID"
+
