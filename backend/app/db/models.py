@@ -103,7 +103,7 @@ class DataSource(Base):
 
     # Metadata
     license = Column(String(255), nullable=True)
-    metadata = Column(JSON, nullable=True)
+    meta_data = Column(JSON, nullable=True)
 
     __table_args__ = (Index("idx_data_sources_type_city", "source_type", "city"),)
 

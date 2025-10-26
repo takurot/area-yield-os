@@ -1,5 +1,6 @@
 """FastAPI Application Entry Point"""
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -29,6 +30,18 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
+
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events"""
+    # Startup
+    logger.info("application_startup", version="0.1.0", environment=settings.ENV)
+    yield
+    # Shutdown
+    logger.info("application_shutdown")
+
+
 # Create FastAPI app
 app = FastAPI(
     title="AreaYield OS API",
@@ -36,6 +49,7 @@ app = FastAPI(
     version="0.1.0",
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
+    lifespan=lifespan,
 )
 
 # CORS Configuration
@@ -85,15 +99,3 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs" if settings.DEBUG else "Contact support for API documentation",
     }
-
-
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    logger.info("application_startup", version="0.1.0", environment=settings.ENV)
-
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("application_shutdown")
