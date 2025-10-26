@@ -51,7 +51,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.utcnow() + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM
@@ -94,7 +94,7 @@ async def get_current_user(
 ) -> dict:
     """Get current authenticated user from token"""
     token = credentials.credentials
-    
+
     # Try Firebase token first
     try:
         user = await verify_firebase_token(token)
@@ -102,7 +102,7 @@ async def get_current_user(
         return user
     except HTTPException:
         pass
-    
+
     # Fallback to JWT token
     try:
         payload = verify_token(token)
@@ -114,24 +114,23 @@ async def get_current_user(
 
 class RoleChecker:
     """Dependency to check user roles"""
-    
+
     def __init__(self, allowed_roles: list):
         self.allowed_roles = allowed_roles
-    
+
     def __call__(self, user: dict = Depends(get_current_user)):
         user_role = user.get("role", "user")
-        
+
         if user_role not in self.allowed_roles:
             logger.warning(
                 "insufficient_permissions",
                 user_role=user_role,
-                required_roles=self.allowed_roles
+                required_roles=self.allowed_roles,
             )
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
             )
-        
+
         return user
 
 
@@ -139,4 +138,3 @@ class RoleChecker:
 require_admin = RoleChecker(["admin"])
 require_user = RoleChecker(["admin", "user"])
 require_api = RoleChecker(["admin", "api"])
-

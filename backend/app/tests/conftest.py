@@ -22,4 +22,3 @@ def sample_address():
 def sample_coordinates():
     """Sample coordinates for testing"""
     return {"lat": 35.0036, "lng": 135.7736}
-

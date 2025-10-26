@@ -48,4 +48,3 @@ async def check_database():
     except Exception as e:
         logger.error("database_check_failed", error=str(e))
         return "error"
-

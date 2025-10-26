@@ -22,4 +22,3 @@ def test_root_endpoint(client: TestClient):
     assert "message" in data
     assert "version" in data
     assert data["message"] == "AreaYield OS API"
-

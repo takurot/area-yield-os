@@ -56,16 +56,16 @@ async def health_check():
     """Health check endpoint"""
     from app.db.base import check_database
     from app.services.firestore import check_firestore
-    
+
     checks = {
         "api": "ok",
         "database": await check_database(),
         "firestore": await check_firestore(),
     }
-    
+
     all_ok = all(v == "ok" for v in checks.values())
     status_code = 200 if all_ok else 503
-    
+
     return JSONResponse(
         content={
             "status": "ok" if all_ok else "degraded",
@@ -97,4 +97,3 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("application_shutdown")
-

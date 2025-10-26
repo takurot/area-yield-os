@@ -29,33 +29,29 @@ def test_user_crud(db_session):
     """Test user CRUD operations"""
     # Create
     user = User(
-        uid="test123",
-        email="test@example.com",
-        full_name="Test User",
-        role="user"
+        uid="test123", email="test@example.com", full_name="Test User", role="user"
     )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
-    
+
     assert user.id is not None
     assert user.uid == "test123"
     assert user.email == "test@example.com"
-    
+
     # Read
     fetched = db_session.query(User).filter_by(uid="test123").first()
     assert fetched is not None
     assert fetched.email == "test@example.com"
-    
+
     # Update
     fetched.full_name = "Updated Name"
     db_session.commit()
     db_session.refresh(fetched)
     assert fetched.full_name == "Updated Name"
-    
+
     # Delete
     db_session.delete(fetched)
     db_session.commit()
     deleted = db_session.query(User).filter_by(uid="test123").first()
     assert deleted is None
-
