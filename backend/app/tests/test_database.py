@@ -1,10 +1,8 @@
 """Test database operations"""
 
 import pytest
-from sqlalchemy import text
 from app.db.base import SessionLocal, check_database
 from app.db.models import User
-from datetime import datetime
 
 
 @pytest.fixture

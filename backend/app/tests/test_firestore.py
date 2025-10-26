@@ -1,7 +1,7 @@
 """Test Firestore operations"""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 from app.services.firestore import FirestoreCache, UserProfileService
 

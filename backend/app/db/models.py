@@ -14,8 +14,6 @@ from sqlalchemy import (
     Index,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 
 from app.db.base import Base
 
