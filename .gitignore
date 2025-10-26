@@ -79,6 +79,9 @@ google-credentials.json
 *~
 .DS_Store
 
+# Playwright MCP
+.playwright-mcp/
+
 # Logs
 logs/
 *.log
