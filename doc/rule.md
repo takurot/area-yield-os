@@ -13,6 +13,7 @@
 - 本規約は全リポジトリメンバーに適用する。違反はコードレビューで指摘・是正する。
 - 仕様の矛盾や未定義事項がある場合は、製品責任者/テックリードへエスカレーションし、合意後に本書へ反映する（PRで更新）。
 - 本規約は `spec.md` と `plan.md` を上位文書とし、乖離が生じた場合は上位文書を優先する。
+- 設計上の重要な技術的決定（例: DBの選定、大規模なアーキテクチャ変更）については、ADR (Architecture Decision Record) を `doc/adr` ディレクトリに作成することを推奨。
 
 ---
 
@@ -22,7 +23,7 @@
 - ブランチ戦略（`doc/plan.md` 7.2）
   - main: 本番デプロイ専用
   - develop: 統合ブランチ
-  - feature/*: 機能単位の作業ブランチ（PR番号を含める例: `feature/PR-018-analyze-endpoint`）
+  - feature/*: 機能単位の作業ブランチ（例: `feature/PR-018-analyze-endpoint`）。GitHub Issues等のチケット番号を用いる `feature/TICKET-123-xxx` 形式を推奨。
 - PR は基本 `feature/* -> develop`。`develop -> main` はリリース時のみ。
 - PR テンプレートを必須とし（`doc/plan.md` 5.2）、チェックリストを満たさないPRはレビュー対象外。
 - コミットメッセージ（`doc/plan.md` 7.3）
@@ -61,7 +62,8 @@
   - 依存分離: 外部APIクライアント/httpx は `services` に集約。
 - FastAPI ルール
   - ルーターは機能単位で分割し `APIRouter(prefix="/api/v1")` を厳守（`spec.md` 6.5）。
-  - 入出力モデルは Pydantic v2 の `BaseModel` を使用し、`json_schema_extra.example` を付与。
+  - 入出力モデルは Pydantic v2 の `BaseModel` を使用し、`Field(examples=["..."])` 等でサンプル値を付与。
+  - フロントエンドとの連携を考慮し、Pydanticモデルの `model_config` でエイリアス（`alias_generator=to_camel`）を設定し、JSONキーを `camelCase` へ自動変換することを推奨。
   - エラーは標準エラーモデル（`spec.md` 6.4）に統一。`HTTPException` ラップ時も JSON 形を崩さない。
   - CORS は許可オリジンのみに限定。`/health` は無認証可。
 - 例外・リトライ
@@ -112,7 +114,7 @@
 - レート制限: プラン別（`spec.md` 6.3）。ヘッダ `X-RateLimit-*` と429時 `Retry-After` を返却（`spec.md` 6.8）。
 - 冪等性: `POST /api/v1/analyze` 等で `Idempotency-Key` 対応（TTL 24h, 409 競合）。
 - 相関ID/監査: `X-Request-Id` を受理/生成しレスポンスへ反映（`spec.md` 6.9）。
-- エラーモデル: `spec.md` 6.4/付録JSON Schemaに完全準拠。例外時も統一形式。
+- エラーモデル: `spec.md` 6.4/付録JSON Schemaに完全準拠。フロントエンドでの処理分岐を容易にするため、`error_code` フィールド（例: `invalid_parameter`）を定義・活用する。例外時も統一形式。
 - ページネーション: カーソル方式 `?limit=50&cursor=opaque`（`spec.md` 6.6）。
 - Deprecation: `Areayield-API-Deprecated`, `Areayield-API-Sunset` を付与（`spec.md` 6.10）。
 - レスポンスヘッダ: `Areayield-API-Version: v1` を常時付与（`spec.md` 6.5）。
@@ -163,6 +165,7 @@
 
 - カバレッジ: ≥80%（MVP）。重要ロジックは 90% 以上を推奨。
 - 種別: ユニット/統合/E2E/負荷/精度検証（`spec.md` 12, `doc/plan.md` フェーズ7）。
+- テスト観点: 正常系だけでなく、異常系・境界値テストを網羅的に記述する。
 - CI 必須チェック（`doc/plan.md` 5.1）
   - Lint（Frontend/Backend）
   - Type check（TS） / mypy（Python）
@@ -188,17 +191,28 @@
 
 ---
 
-## 13. 命名規則（横断）
+## 13. Infrastructure as Code (Terraform)
+
+- ツール: Terraform >= 1.5
+- フォーマット: `terraform fmt -recursive` を pre-commit/CI で強制。
+- 構成: 環境分離（`dev`/`prd`）は workspace を使用。共通リソースはモジュール化し `infrastructure/terraform/modules` 配下で管理。
+- 命名規則: リソース名は `gcp_project-service-env` のように接頭辞を統一。変数は `snake_case`。
+- 状態管理: GCS バケットで tfstate を一元管理・ロック。
+- 機密情報: `.tfvars` ファイルに直接記述せず、Secret Manager 経由で参照。
+
+---
+
+## 14. 命名規則（横断）
 
 - API パス: `kebab-case`、リソースは複数形、バージョンは `/api/v1` 固定。
-- JSON フィールド: `snake_case`（バックエンド内部）/ フロント公開は仕様通り（`spec.md` 4.2 のキー名を遵守）。
+- JSON フィールド: `snake_case`（バックエンド内部）/ フロント公開は仕様通り（`spec.md` 4.2 のキー名を遵守）。Pydanticのエイリアス機能で `camelCase` 変換を推奨。
 - DB テーブル/カラム: `snake_case`。リレーションは `<entity>_id`。
 - イベント名/ログキー: `snake_case`。メトリクスは英語の短い識別子を使用。
 - フィーチャーフラグ: `ff_<feature>_<purpose>`。
 
 ---
 
-## 14. PR/レビュー/リリース
+## 15. PR/レビュー/リリース
 
 - PR 規模はレビュー 30 分以内を目安（大規模変更は分割）。
 - スクリーンショット・APIサンプル・テスト結果を PR に必ず添付（UI/API 変更時）。
@@ -207,7 +221,7 @@
 
 ---
 
-## 15. 付録（参考設定）
+## 16. 付録（参考設定）
 
 - Backend Lint コマンド（CI と一致）
   - `flake8 app --max-line-length=120 && black --check app && mypy app`
@@ -221,4 +235,5 @@
 
 ## 変更履歴
 
-- 2025-10-26: 初版作成（`spec.md` v1.0.0, `plan.md` v1.0.0 準拠）
+- 2025-10-26: v1.0.0 初版作成（`spec.md` v1.0.0, `plan.md` v1.0.0 準拠）
+- 2025-10-26: v1.1.0 シニアエンジニアレビューに基づき改善（ADR、ブランチ戦略、IaC規約、テスト観点、APIエラーコード等）

@@ -1,8 +1,7 @@
 """SQLAlchemy base configuration"""
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import structlog
 
 from app.core.config import settings
@@ -25,8 +24,12 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
+
 # Create base class for models
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Base class for all SQLAlchemy models"""
+
+    pass
 
 
 def get_db():
@@ -42,10 +45,9 @@ async def check_database():
     """Check database connection"""
     try:
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         return "ok"
     except Exception as e:
         logger.error("database_check_failed", error=str(e))
         return "error"
-
