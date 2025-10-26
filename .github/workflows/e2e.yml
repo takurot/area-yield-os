@@ -30,9 +30,10 @@ jobs:
       - name: Run E2E tests
         run: |
           cd frontend
-          npm run test:e2e || true
+          npm run test:e2e
         env:
           BASE_URL: http://localhost:3000
+        continue-on-error: true
       
       - name: Upload test results
         if: always()
