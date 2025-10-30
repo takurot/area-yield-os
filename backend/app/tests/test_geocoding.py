@@ -1,5 +1,6 @@
 """Test geocoding service"""
 
+import os
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from app.services.geocoding import (
@@ -11,8 +12,12 @@ from app.services.geocoding import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_address_kyoto():
     """Test geocoding a valid Kyoto address"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     address = "京都府京都市東山区祇園町南側570-120"
 
     result = await geocode_address(address)
@@ -25,8 +30,12 @@ async def test_geocode_address_kyoto():
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_address_tokyo():
     """Test geocoding a valid Tokyo address"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     address = "東京都渋谷区道玄坂1-2-3"
 
     result = await geocode_address(address)
@@ -38,8 +47,12 @@ async def test_geocode_address_tokyo():
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_address_osaka():
     """Test geocoding a valid Osaka address"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     address = "大阪府大阪市中央区難波5-1-60"
 
     result = await geocode_address(address)
@@ -51,8 +64,12 @@ async def test_geocode_address_osaka():
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_address_okinawa():
     """Test geocoding a valid Okinawa address"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     address = "沖縄県那覇市おもろまち1-1-1"
 
     result = await geocode_address(address)
@@ -64,8 +81,12 @@ async def test_geocode_address_okinawa():
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_invalid_address():
     """Test geocoding with invalid address"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     invalid_address = "無効な住所12345あいうえお"
 
     with pytest.raises(GeocodingError) as exc_info:
@@ -105,8 +126,10 @@ def test_normalize_address_empty():
 
 @pytest.mark.asyncio
 @patch("app.services.geocoding.httpx.AsyncClient")
-async def test_geocode_with_rate_limiting(mock_client):
+@patch("app.services.geocoding.settings")
+async def test_geocode_with_rate_limiting(mock_settings, mock_client):
     """Test rate limiting behavior"""
+    mock_settings.GOOGLE_MAPS_API_KEY = "test-api-key"
     mock_response = Mock()
     mock_response.status_code = 429
     mock_response.json.return_value = {
@@ -128,8 +151,10 @@ async def test_geocode_with_rate_limiting(mock_client):
 
 @pytest.mark.asyncio
 @patch("app.services.geocoding.httpx.AsyncClient")
-async def test_geocode_network_error(mock_client):
+@patch("app.services.geocoding.settings")
+async def test_geocode_network_error(mock_settings, mock_client):
     """Test handling network errors"""
+    mock_settings.GOOGLE_MAPS_API_KEY = "test-api-key"
     mock_instance = AsyncMock()
     mock_instance.get.side_effect = Exception("Network error")
     mock_client.return_value.__aenter__.return_value = mock_instance
@@ -141,8 +166,12 @@ async def test_geocode_network_error(mock_client):
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
 async def test_geocode_result_rounding():
     """Test that coordinates are properly rounded to town level"""
+    if not os.getenv("GOOGLE_MAPS_API_KEY"):
+        pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
+
     address = "京都府京都市東山区祇園町南側570-120"
 
     result = await geocode_address(address)

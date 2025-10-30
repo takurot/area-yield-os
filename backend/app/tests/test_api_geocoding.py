@@ -1,6 +1,5 @@
 """Test geocoding API endpoints"""
 
-import pytest
 from unittest.mock import patch, AsyncMock
 from fastapi.testclient import TestClient
 
@@ -17,6 +16,7 @@ def test_geocode_endpoint_success(client: TestClient):
         prefecture="京都府",
         city="京都市東山区",
         district="祇園町南側",
+        postal_code=None,  # Optional field
     )
 
     with patch(

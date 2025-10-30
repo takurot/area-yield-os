@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import OperationalError
 
 from app.main import app
 from app.db.base import Base, engine
@@ -10,11 +11,20 @@ from app.db.base import Base, engine
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
     """Create database tables for testing"""
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-    yield
-    # Drop all tables after tests
-    Base.metadata.drop_all(bind=engine)
+    # Try to create tables, but don't fail if database is not available
+    # Some tests (like geocoding) don't require database
+    try:
+        Base.metadata.create_all(bind=engine)
+        yield
+        # Drop all tables after tests
+        try:
+            Base.metadata.drop_all(bind=engine)
+        except OperationalError:
+            # Ignore drop errors if database is not available
+            pass
+    except OperationalError:
+        # Database not available, skip setup/teardown
+        yield
 
 
 @pytest.fixture

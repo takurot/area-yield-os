@@ -47,7 +47,7 @@ jobs:
       - name: Run linters
         run: |
           cd backend
-          flake8 app --max-line-length=120 --exclude=__pycache__,.venv,venv --exit-zero
+          flake8 app --max-line-length=120 --exclude=__pycache__,.venv,venv,._* --exit-zero
           black --check app
           mypy app --ignore-missing-imports || true
       
