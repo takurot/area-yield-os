@@ -27,11 +27,11 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
 
     # External APIs
+    GOOGLE_MAPS_API_KEY: str = ""  # Google Maps Geocoding API
     AIRDNA_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
     PINECONE_API_KEY: str = ""
     PINECONE_ENVIRONMENT: str = ""
-    GOOGLE_GEOCODING_API_KEY: str = ""
     MAPBOX_API_KEY: str = ""
 
     # BigQuery

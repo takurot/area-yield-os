@@ -66,6 +66,11 @@ next-env.d.ts
 .env.production.local
 .env*.local
 
+# Firebase / GCP Credentials
+firebase-service-account.json
+*-service-account.json
+google-credentials.json
+
 # IDEs
 .vscode/
 .idea/
@@ -73,6 +78,9 @@ next-env.d.ts
 *.swo
 *~
 .DS_Store
+
+# Playwright MCP
+.playwright-mcp/
 
 # Logs
 logs/

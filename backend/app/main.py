@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 import structlog
 
 from app.core.config import settings
-from app.api.v1 import auth
+from app.api.v1 import auth, geocoding
 
 # Configure structured logging
 structlog.configure(
@@ -63,6 +63,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(geocoding.router, prefix="/api/v1")
 
 
 @app.get("/health")
