@@ -36,7 +36,5 @@ class GeocodingRequest(BaseModel):
     address: str = Field(..., min_length=1, description="Address to geocode")
 
     model_config = ConfigDict(
-        json_schema_extra={
-            "example": {"address": "京都府京都市東山区祇園町南側570-120"}
-        }
+        json_schema_extra={"example": {"address": "京都府京都市東山区祇園町南側570-120"}}
     )
