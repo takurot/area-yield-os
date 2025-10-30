@@ -126,8 +126,10 @@ def test_normalize_address_empty():
 
 @pytest.mark.asyncio
 @patch("app.services.geocoding.httpx.AsyncClient")
-async def test_geocode_with_rate_limiting(mock_client):
+@patch("app.services.geocoding.settings")
+async def test_geocode_with_rate_limiting(mock_settings, mock_client):
     """Test rate limiting behavior"""
+    mock_settings.GOOGLE_MAPS_API_KEY = "test-api-key"
     mock_response = Mock()
     mock_response.status_code = 429
     mock_response.json.return_value = {
@@ -149,8 +151,10 @@ async def test_geocode_with_rate_limiting(mock_client):
 
 @pytest.mark.asyncio
 @patch("app.services.geocoding.httpx.AsyncClient")
-async def test_geocode_network_error(mock_client):
+@patch("app.services.geocoding.settings")
+async def test_geocode_network_error(mock_settings, mock_client):
     """Test handling network errors"""
+    mock_settings.GOOGLE_MAPS_API_KEY = "test-api-key"
     mock_instance = AsyncMock()
     mock_instance.get.side_effect = Exception("Network error")
     mock_client.return_value.__aenter__.return_value = mock_instance
