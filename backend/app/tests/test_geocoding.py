@@ -17,7 +17,7 @@ async def test_geocode_address_kyoto():
     """Test geocoding a valid Kyoto address"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     address = "京都府京都市東山区祇園町南側570-120"
 
     result = await geocode_address(address)
@@ -35,7 +35,7 @@ async def test_geocode_address_tokyo():
     """Test geocoding a valid Tokyo address"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     address = "東京都渋谷区道玄坂1-2-3"
 
     result = await geocode_address(address)
@@ -52,7 +52,7 @@ async def test_geocode_address_osaka():
     """Test geocoding a valid Osaka address"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     address = "大阪府大阪市中央区難波5-1-60"
 
     result = await geocode_address(address)
@@ -69,7 +69,7 @@ async def test_geocode_address_okinawa():
     """Test geocoding a valid Okinawa address"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     address = "沖縄県那覇市おもろまち1-1-1"
 
     result = await geocode_address(address)
@@ -86,7 +86,7 @@ async def test_geocode_invalid_address():
     """Test geocoding with invalid address"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     invalid_address = "無効な住所12345あいうえお"
 
     with pytest.raises(GeocodingError) as exc_info:
@@ -167,7 +167,7 @@ async def test_geocode_result_rounding():
     """Test that coordinates are properly rounded to town level"""
     if not os.getenv("GOOGLE_MAPS_API_KEY"):
         pytest.skip("GOOGLE_MAPS_API_KEY not set, skipping integration test")
-    
+
     address = "京都府京都市東山区祇園町南側570-120"
 
     result = await geocode_address(address)
